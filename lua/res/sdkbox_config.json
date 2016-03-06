@@ -1,14 +1,14 @@
 {
     "android": {
         "ValuePotion": {
-            "secretKey": "1c110ebcdeeda25d", 
-            "senderId": "111111", 
+            "secretKey": "1c110ebcdeeda25d",
+            "senderId": "111111",
             "clientId": "9666f9668a4db516c8aaea439464da44"
         }
-    }, 
+    },
     "ios": {
         "ValuePotion": {
-            "secretKey": "8c4c7e90e16112a5", 
+            "secretKey": "8c4c7e90e16112a5",
             "clientId": "67d86501427397952f8c230a45b8e64a"
         }
     }

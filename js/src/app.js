@@ -31,23 +31,78 @@ var HelloWorldLayer = cc.Layer.extend({
     },
 
     createTestMenu:function() {
-        var item1 = new cc.MenuItemLabel(new cc.LabelTTF("Test Item 1", "sans", 28), function() {
-            cc.log("Test Item 1");
+        var menu = cc.Menu.create();
+
+        sdkbox.PluginValuePotion.setTest(true);
+        sdkbox.PluginValuePotion.setListener({
+            onCacheInterstitial: function(placement) {
+                cc.log("onCacheInterstitial ");
+            },
+            onFailToCacheInterstitial: function(placement, errorMessage) {
+                cc.log("onFailToCacheInterstitial " + placement + ", error: " + errorMessage);
+            },
+            onOpenInterstitial: function(placement) {
+                cc.log("onOpenInterstitial " + placement);
+            },
+            onFailToOpenInterstitial: function(placement, errorMessage) {
+                cc.log("onFailToOpenInterstitial " + placement + ", error: " + errorMessage);
+            },
+            onCloseInterstitial: function(placement) {
+                cc.log("onCloseInterstitial " + placement);
+            },
+            onRequestOpenURL: function(placement, URL) {
+                cc.log("onRequestOpenURL " + placement + ", URL: " + URL);
+            },
+            onRequestPurchase: function(placement, name, productId, quantity, campaignId, contentId) {
+                cc.log("onRequestPurchase " + placement);
+                cc.log("  name: " + name);
+                cc.log("  productId: " + productId);
+                cc.log("  quantity: " + quantity.toString());
+                cc.log("  campaignId: " + campaignId);
+                cc.log("  contentId: " + contentId);
+            },
+            onRequestRewards: function(placement, rewards) {
+                cc.log("onRequestRewards ");
+                for (var i = rewards.length - 1; i >= 0; i--) {
+                    var r = rewards[i];
+                    cc.log("%d name:%s, q:%d", i, r.name, r.quantity);
+                }
+            }
         });
 
-        var item2 = new cc.MenuItemLabel(new cc.LabelTTF("Test Item 2", "sans", 28), function() {
-            cc.log("Test Item 2");
-        });
+        sdkbox.PluginValuePotion.cacheInterstitial("default");
 
-        var item3 = new cc.MenuItemLabel(new cc.LabelTTF("Test Item 3", "sans", 28), function() {
-            cc.log("Test Item 3");
-        });
+        menu.addChild(new cc.MenuItemLabel(new cc.LabelTTF("open interstitial", "sans", 24), function() {
+            cc.log("open interstitial");
+            sdkbox.PluginValuePotion.openInterstitial("default");
+        }));
 
-        var winsize = cc.winSize;
-        var menu = new cc.Menu(item1, item2, item3);
-        menu.x = winsize.width / 2;
-        menu.y = winsize.height / 2;
-        menu.alignItemsVerticallyWithPadding(20);
+        menu.addChild(new cc.MenuItemLabel(new cc.LabelTTF("track event", "sans", 24), function() {
+            cc.log("track event");
+            sdkbox.PluginValuePotion.trackEvent("test event");
+            sdkbox.PluginValuePotion.trackEvent("test event with value 23", 23);
+            sdkbox.PluginValuePotion.trackEvent("category", "event name", "label", 45);
+        }));
+
+        menu.addChild(new cc.MenuItemLabel(new cc.LabelTTF("track purchase event", "sans", 24), function() {
+            cc.log("track purchase event");
+            sdkbox.PluginValuePotion.trackPurchaseEvent("test event", 56, "RMB", "order id", "product id");
+            sdkbox.PluginValuePotion.trackPurchaseEvent("test event", 67, "USD", "order id", "product id", "campaign id", "content id");
+            sdkbox.PluginValuePotion.trackPurchaseEvent("categroy", "event name", "label", 78, "ILY", "order id", "product id", "campaign id", "content id");
+        }));
+
+        menu.addChild(new cc.MenuItemLabel(new cc.LabelTTF("set user info", "sans", 24), function() {
+            cc.log("set user info");
+            sdkbox.PluginValuePotion.userinfo("id", "user id");
+            sdkbox.PluginValuePotion.userinfo("serverid", "server id");
+            sdkbox.PluginValuePotion.userinfo("birth", "19991111"); // YYYYMMDD
+            sdkbox.PluginValuePotion.userinfo("gender", "M");
+            sdkbox.PluginValuePotion.userinfo("level", "9");
+            sdkbox.PluginValuePotion.userinfo("friends", "3");
+            sdkbox.PluginValuePotion.userinfo("accounttype", "facebook");
+        }));
+
+        menu.alignItemsVerticallyWithPadding(10);
         this.addChild(menu);
     }
 });

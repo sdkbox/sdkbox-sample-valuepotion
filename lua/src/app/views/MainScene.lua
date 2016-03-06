@@ -18,26 +18,47 @@ function MainScene:onCreate()
 end
 
 function MainScene:setupTestMenu()
-    local label1 = cc.Label:createWithSystemFont("Test Item 1", "sans", 28)
-    local item1 = cc.MenuItemLabel:create(label1)
-    item1:onClicked(function()
-        print("Test Item 1")
-    end)
+    local menu = cc.Menu:create()
 
-    local label2 = cc.Label:createWithSystemFont("Test Item 2", "sans", 28)
-    local item2 = cc.MenuItemLabel:create(label2)
-    item2:onClicked(function()
-        print("Test Item 2")
+    sdkbox.PluginValuePotion:setTest(true)
+    sdkbox.PluginValuePotion:setListener(function(data)
+        local event = args.event
+        print("receive event:", event)
+        dump(args, "value potion listener info:")
     end)
+    sdkbox.PluginValuePotion:cacheInterstitial("default")
 
-    local label3 = cc.Label:createWithSystemFont("Test Item 3", "sans", 28)
-    local item3 = cc.MenuItemLabel:create(label3)
-    item3:onClicked(function()
-        print("Test Item 3")
-    end)
+    menu:addChild(cc.MenuItemLabel:create(cc.Label:createWithSystemFont("open interstitial", "sans", 24)):onClicked(function()
+        printf("open interstitial")
+        sdkbox.PluginValuePotion:openInterstitial("default")
+    end))
 
-    local menu = cc.Menu:create(item1, item2, item3)
-    menu:alignItemsVerticallyWithPadding(24)
+    menu:addChild(cc.MenuItemLabel:create(cc.Label:createWithSystemFont("track event", "sans", 24)):onClicked(function()
+        printf("track event")
+        sdkbox.PluginValuePotion:trackEvent("test event")
+        sdkbox.PluginValuePotion:trackEvent("test event with value 23", 23)
+        sdkbox.PluginValuePotion:trackEvent("category", "event name", "label", 45)
+    end))
+
+    menu:addChild(cc.MenuItemLabel:create(cc.Label:createWithSystemFont("track purchase event", "sans", 24)):onClicked(function()
+        printf("track purchase event")
+        sdkbox.PluginValuePotion:trackPurchaseEvent("test event", 56, "RMB", "order id", "product id")
+        sdkbox.PluginValuePotion:trackPurchaseEvent("test event", 67, "USD", "order id", "product id", "campaign id", "content id")
+        sdkbox.PluginValuePotion:trackPurchaseEvent("categroy", "event name", "label", 78, "ILY", "order id", "product id", "campaign id", "content id")
+    end))
+
+    menu:addChild(cc.MenuItemLabel:create(cc.Label:createWithSystemFont("set user info", "sans", 24)):onClicked(function()
+        printf("set user info")
+        sdkbox.PluginValuePotion:userinfo("id", "user id")
+        sdkbox.PluginValuePotion:userinfo("serverid", "server id")
+        sdkbox.PluginValuePotion:userinfo("birth", "19991111") -- YYYYMMDD
+        sdkbox.PluginValuePotion:userinfo("gender", "M")
+        sdkbox.PluginValuePotion:userinfo("level", "9")
+        sdkbox.PluginValuePotion:userinfo("friends", "3")
+        sdkbox.PluginValuePotion:userinfo("accounttype", "facebook")
+    end))
+
+    menu:alignItemsVerticallyWithPadding(10)
     self:addChild(menu)
 end
 
