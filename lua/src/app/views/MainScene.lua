@@ -20,8 +20,9 @@ end
 function MainScene:setupTestMenu()
     local menu = cc.Menu:create()
 
+    sdkbox.PluginValuePotion:init()
     sdkbox.PluginValuePotion:setTest(true)
-    sdkbox.PluginValuePotion:setListener(function(data)
+    sdkbox.PluginValuePotion:setListener(function(args)
         local event = args.event
         print("receive event:", event)
         dump(args, "value potion listener info:")

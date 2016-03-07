@@ -33,6 +33,7 @@ var HelloWorldLayer = cc.Layer.extend({
     createTestMenu:function() {
         var menu = cc.Menu.create();
 
+        sdkbox.PluginValuePotion.init();
         sdkbox.PluginValuePotion.setTest(true);
         sdkbox.PluginValuePotion.setListener({
             onCacheInterstitial: function(placement) {
