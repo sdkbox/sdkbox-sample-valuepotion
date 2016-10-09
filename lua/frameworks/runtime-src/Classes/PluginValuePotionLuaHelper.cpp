@@ -1,8 +1,6 @@
 
 #include "PluginValuePotionLuaHelper.h"
 #include "PluginValuePotion/PluginValuePotion.h"
-#include "CCLuaEngine.h"
-#include "tolua_fix.h"
 #include "SDKBoxLuaHelper.h"
 
 class ValuePotionListenerLua : public sdkbox::ValuePotionListener {
