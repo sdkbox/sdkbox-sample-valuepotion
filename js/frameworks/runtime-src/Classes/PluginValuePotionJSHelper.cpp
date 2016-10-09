@@ -1,35 +1,31 @@
 #include "PluginValuePotionJSHelper.h"
-#include "cocos2d_specifics.hpp"
 #include "PluginValuePotion/PluginValuePotion.h"
 #include "SDKBoxJSHelper.h"
-
-#include "js_manual_conversions.h"
-#include "cocos2d_specifics.hpp"
 
 extern JSObject* jsb_sdkbox_PluginValuePotion_prototype;
 static JSContext* s_cx = nullptr;
 
-class VPCallbackJS: public cocos2d::CCObject {
+#if (COCOS2D_VERSION < 0x00030000)
+#define Ref CCObject
+#define Director CCDirector
+#define getInstance sharedDirector
+#define schedule scheduleSelector
+#endif
+
+class VPCallbackJS: public cocos2d::Ref {
 public:
     void schedule();
     void notityJs(float dt);
-    
+
     jsval _dataVal[6];
     int _dataLen;
     std::string _name;
 };
 
-class ValuePotionListenerJS : public sdkbox::ValuePotionListener {
-private:
-    JSObject* _JSDelegate;
-
+class ValuePotionListenerJS : public sdkbox::ValuePotionListener, public sdkbox::JSListenerBase
+{
 public:
-    void setJSDelegate(JSObject* delegate) {
-        _JSDelegate = delegate;
-    }
-
-    JSObject* getJSDelegate() {
-        return _JSDelegate;
+    ValuePotionListenerJS():sdkbox::JSListenerBase() {
     }
 
     void onCacheInterstitial(const char *placement) {
@@ -39,7 +35,7 @@ public:
         cb->_dataVal[0] = std_string_to_jsval(cx, placement);
         cb->_dataLen = 1;
         cb->_name = "onCacheInterstitial";
-        
+
         cb->schedule();
         cb->autorelease();
     }
@@ -52,7 +48,7 @@ public:
         cb->_dataVal[1] = std_string_to_jsval(cx, errorMessage);
         cb->_dataLen = 2;
         cb->_name = "onFailToCacheInterstitial";
-        
+
         cb->schedule();
         cb->autorelease();
     }
@@ -64,7 +60,7 @@ public:
         cb->_dataVal[0] = std_string_to_jsval(cx, placement);
         cb->_dataLen = 1;
         cb->_name = "onOpenInterstitial";
-        
+
         cb->schedule();
         cb->autorelease();
     }
@@ -77,7 +73,7 @@ public:
         cb->_dataVal[1] = std_string_to_jsval(cx, errorMessage);
         cb->_dataLen = 2;
         cb->_name = "onFailToOpenInterstitial";
-        
+
         cb->schedule();
         cb->autorelease();
     }
@@ -89,7 +85,7 @@ public:
         cb->_dataVal[0] = std_string_to_jsval(cx, placement);
         cb->_dataLen = 1;
         cb->_name = "onCloseInterstitial";
-        
+
         cb->schedule();
         cb->autorelease();
     }
@@ -102,7 +98,7 @@ public:
         cb->_dataVal[1] = std_string_to_jsval(cx, URL);
         cb->_dataLen = 2;
         cb->_name = "onRequestOpenURL";
-        
+
         cb->schedule();
         cb->autorelease();
     }
@@ -119,7 +115,7 @@ public:
         cb->_dataVal[5] = std_string_to_jsval(cx, contentId);
         cb->_dataLen = 6;
         cb->_name = "onRequestPurchase";
-        
+
         cb->schedule();
         cb->autorelease();
     }
@@ -132,7 +128,7 @@ public:
         cb->_dataVal[1] = OBJECT_TO_JSVAL(rewards_to_obj(s_cx, rewards));
         cb->_dataLen = 2;
         cb->_name = "onRequestRewards";
-        
+
         cb->schedule();
         cb->autorelease();
     }
@@ -143,7 +139,7 @@ public:
         }
         JSContext* cx = s_cx;
         const char* func_name = func;
-        JS::RootedObject obj(cx, _JSDelegate);
+        JS::RootedObject obj(cx, getJSDelegate());
         JSAutoCompartment ac(cx, obj);
 
 #if defined(MOZJS_MAJOR_VERSION)
@@ -237,7 +233,7 @@ public:
 
 void VPCallbackJS::schedule() {
     retain();
-    cocos2d::CCDirector::sharedDirector()->getScheduler()->scheduleSelector(schedule_selector(VPCallbackJS::notityJs), this, 0.1, false);
+    cocos2d::Director::getInstance()->getScheduler()->schedule(schedule_selector(VPCallbackJS::notityJs), this, 0.1, 0, 0.0f, false);
 }
 
 void VPCallbackJS::notityJs(float dt) {
@@ -246,7 +242,6 @@ void VPCallbackJS::notityJs(float dt) {
     if (l) {
         l->invokeJS(_name.c_str(), _dataVal, _dataLen);
     }
-    cocos2d::CCDirector::sharedDirector()->getScheduler()->unscheduleAllForTarget(this);
     release();
 }
 
@@ -271,11 +266,10 @@ JSBool js_PluginValuePotionJS_PluginValuePotion_setListener(JSContext *cx, uint3
         {
             ok = false;
         }
-        JSObject *tmpObj = args.get(0).toObjectOrNull();
 
         JSB_PRECONDITION2(ok, cx, false, "js_PluginValuePotionJS_PluginValuePotion_setIAPListener : Error processing arguments");
         ValuePotionListenerJS* wrapper = new ValuePotionListenerJS();
-        wrapper->setJSDelegate(tmpObj);
+        wrapper->setJSDelegate(args.get(0));
         sdkbox::PluginValuePotion::setListener(wrapper);
 
         args.rval().setUndefined();
