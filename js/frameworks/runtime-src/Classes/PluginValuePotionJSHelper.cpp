@@ -17,7 +17,7 @@ public:
     void schedule();
     void notityJs(float dt);
 
-    jsval _dataVal[6];
+    JS::Value _dataVal[6];
     int _dataLen;
     std::string _name;
 };
@@ -32,7 +32,10 @@ public:
         JSContext* cx = s_cx;
 
         VPCallbackJS* cb = new VPCallbackJS();
-        cb->_dataVal[0] = std_string_to_jsval(cx, placement);
+#if MOZJS_MAJOR_VERSION < 52
+        JSB_AUTOCOMPARTMENT_WITH_GLOBAL_OBJCET
+#endif
+        cb->_dataVal[0] = SB_CSTR_TO_JSVAL(cx, placement);
         cb->_dataLen = 1;
         cb->_name = "onCacheInterstitial";
 
@@ -44,8 +47,11 @@ public:
         JSContext* cx = s_cx;
 
         VPCallbackJS* cb = new VPCallbackJS();
-        cb->_dataVal[0] = std_string_to_jsval(cx, placement);
-        cb->_dataVal[1] = std_string_to_jsval(cx, errorMessage);
+#if MOZJS_MAJOR_VERSION < 52
+        JSB_AUTOCOMPARTMENT_WITH_GLOBAL_OBJCET
+#endif
+        cb->_dataVal[0] = SB_CSTR_TO_JSVAL(cx, placement);
+        cb->_dataVal[1] = SB_CSTR_TO_JSVAL(cx, errorMessage);
         cb->_dataLen = 2;
         cb->_name = "onFailToCacheInterstitial";
 
@@ -57,7 +63,10 @@ public:
         JSContext* cx = s_cx;
 
         VPCallbackJS* cb = new VPCallbackJS();
-        cb->_dataVal[0] = std_string_to_jsval(cx, placement);
+#if MOZJS_MAJOR_VERSION < 52
+        JSB_AUTOCOMPARTMENT_WITH_GLOBAL_OBJCET
+#endif
+        cb->_dataVal[0] = SB_CSTR_TO_JSVAL(cx, placement);
         cb->_dataLen = 1;
         cb->_name = "onOpenInterstitial";
 
@@ -69,8 +78,11 @@ public:
         JSContext* cx = s_cx;
 
         VPCallbackJS* cb = new VPCallbackJS();
-        cb->_dataVal[0] = std_string_to_jsval(cx, placement);
-        cb->_dataVal[1] = std_string_to_jsval(cx, errorMessage);
+#if MOZJS_MAJOR_VERSION < 52
+        JSB_AUTOCOMPARTMENT_WITH_GLOBAL_OBJCET
+#endif
+        cb->_dataVal[0] = SB_CSTR_TO_JSVAL(cx, placement);
+        cb->_dataVal[1] = SB_CSTR_TO_JSVAL(cx, errorMessage);
         cb->_dataLen = 2;
         cb->_name = "onFailToOpenInterstitial";
 
@@ -82,7 +94,10 @@ public:
         JSContext* cx = s_cx;
 
         VPCallbackJS* cb = new VPCallbackJS();
-        cb->_dataVal[0] = std_string_to_jsval(cx, placement);
+#if MOZJS_MAJOR_VERSION < 52
+        JSB_AUTOCOMPARTMENT_WITH_GLOBAL_OBJCET
+#endif
+        cb->_dataVal[0] = SB_CSTR_TO_JSVAL(cx, placement);
         cb->_dataLen = 1;
         cb->_name = "onCloseInterstitial";
 
@@ -94,8 +109,11 @@ public:
         JSContext* cx = s_cx;
 
         VPCallbackJS* cb = new VPCallbackJS();
-        cb->_dataVal[0] = std_string_to_jsval(cx, placement);
-        cb->_dataVal[1] = std_string_to_jsval(cx, URL);
+#if MOZJS_MAJOR_VERSION < 52
+        JSB_AUTOCOMPARTMENT_WITH_GLOBAL_OBJCET
+#endif
+        cb->_dataVal[0] = SB_CSTR_TO_JSVAL(cx, placement);
+        cb->_dataVal[1] = SB_CSTR_TO_JSVAL(cx, URL);
         cb->_dataLen = 2;
         cb->_name = "onRequestOpenURL";
 
@@ -107,12 +125,15 @@ public:
         JSContext* cx = s_cx;
 
         VPCallbackJS* cb = new VPCallbackJS();
-        cb->_dataVal[0] = std_string_to_jsval(cx, placement);
-        cb->_dataVal[1] = std_string_to_jsval(cx, name);
-        cb->_dataVal[2] = std_string_to_jsval(cx, productId);
-        cb->_dataVal[3] = INT_TO_JSVAL(quantity);
-        cb->_dataVal[4] = std_string_to_jsval(cx, campaignId);
-        cb->_dataVal[5] = std_string_to_jsval(cx, contentId);
+#if MOZJS_MAJOR_VERSION < 52
+        JSB_AUTOCOMPARTMENT_WITH_GLOBAL_OBJCET
+#endif
+        cb->_dataVal[0] = SB_CSTR_TO_JSVAL(cx, placement);
+        cb->_dataVal[1] = SB_CSTR_TO_JSVAL(cx, name);
+        cb->_dataVal[2] = SB_CSTR_TO_JSVAL(cx, productId);
+        cb->_dataVal[3] = JS::Int32Value(quantity);
+        cb->_dataVal[4] = SB_CSTR_TO_JSVAL(cx, campaignId);
+        cb->_dataVal[5] = SB_CSTR_TO_JSVAL(cx, contentId);
         cb->_dataLen = 6;
         cb->_name = "onRequestPurchase";
 
@@ -124,8 +145,13 @@ public:
         JSContext* cx = s_cx;
 
         VPCallbackJS* cb = new VPCallbackJS();
-        cb->_dataVal[0] = std_string_to_jsval(cx, placement);
-        cb->_dataVal[1] = OBJECT_TO_JSVAL(rewards_to_obj(s_cx, rewards));
+#if MOZJS_MAJOR_VERSION < 52
+        JSB_AUTOCOMPARTMENT_WITH_GLOBAL_OBJCET
+#endif
+        cb->_dataVal[0] = SB_CSTR_TO_JSVAL(cx, placement);
+        JS::RootedValue jsRewards(cx);
+        rewards_to_obj(s_cx, rewards, &jsRewards);
+        cb->_dataVal[1] = jsRewards;
         cb->_dataLen = 2;
         cb->_name = "onRequestRewards";
 
@@ -133,7 +159,7 @@ public:
         cb->autorelease();
     }
 
-    void invokeJS(const char* func, jsval* pVals, int valueSize) {
+    void invokeJS(const char* func, JS::Value* pVals, int valueSize) {
         if (!s_cx) {
             return;
         }
@@ -162,7 +188,7 @@ public:
             if(!JS_GetProperty(cx, obj, func_name, &func_handle)) {
                 return;
             }
-            if(func_handle == JSVAL_VOID) {
+            if(func_handle == JS::NullValue()) {
                 return;
             }
 
@@ -174,23 +200,27 @@ public:
         }
     }
 
-    JSObject* reward_to_obj(JSContext* cx, const sdkbox::ValuePotionReward& reward) {
+    void reward_to_obj(JSContext* cx, const sdkbox::ValuePotionReward& reward, JS::MutableHandleValue retValue) {
 #if defined(MOZJS_MAJOR_VERSION)
 #if MOZJS_MAJOR_VERSION >= 33
+#if MOZJS_MAJOR_VERSION >= 52
+        JS::RootedObject jsobj(cx, JS_NewObject(cx, NULL));
+#else
         JS::RootedObject jsobj(cx, JS_NewObject(cx, NULL, JS::NullPtr(), JS::NullPtr()));
+#endif
 
         JS::RootedValue name(cx);
-        name = std_string_to_jsval(cx, reward.name);
+        name = SB_STR_TO_JSVAL(cx, reward.name);
         JS_SetProperty(cx, jsobj, "name", name);
 
         JS::RootedValue quantity(cx);
-        quantity = INT_TO_JSVAL(reward.quantity);
+        quantity = JS::Int32Value(reward.quantity);
         JS_SetProperty(cx, jsobj, "quantity", quantity);
 #else
         JSObject* jsobj = JS_NewObject(cx, NULL, NULL, NULL);
 
         JS::RootedValue name(cx);
-        name = std_string_to_jsval(cx, reward.name);
+        name = SB_STR_TO_JSVAL(cx, reward.name);
         JS_SetProperty(cx, jsobj, "name", name);
 
         JS::RootedValue quantity(cx);
@@ -201,7 +231,7 @@ public:
         JSObject* jsobj = JS_NewObject(cx, NULL, NULL, NULL);
 
         jsval name;
-        name = std_string_to_jsval(cx, reward.name);
+        name = SB_STR_TO_JSVAL(cx, reward.name);
         JS_SetProperty(cx, jsobj, "name", &name);
 
         jsval quantity;
@@ -209,23 +239,22 @@ public:
         JS_SetProperty(cx, jsobj, "quantity", &quantity);
 #endif
 
-        return jsobj;
+        retValue.set(JS::ObjectValue(*jsobj.get()));
     }
 
-    JSObject* rewards_to_obj(JSContext* cx, const std::vector<sdkbox::ValuePotionReward>& rewards) {
+    void rewards_to_obj(JSContext* cx, const std::vector<sdkbox::ValuePotionReward>& rewards, JS::MutableHandleValue retValue) {
         JS::RootedObject jsretArr(cx, JS_NewArrayObject(cx, 0));
 
         for (int i = 0; i < rewards.size(); ++i) {
-            JSObject* element = reward_to_obj(cx, rewards[i]);
-            JS::RootedValue arrElement(cx);
-            arrElement = OBJECT_TO_JSVAL(element);
+            JS::RootedValue element(cx);
+            reward_to_obj(cx, rewards[i], &element);
 
-            if (!JS_SetElement(cx, jsretArr, i, arrElement)) {
+            if (!JS_SetElement(cx, jsretArr, i, element)) {
                 break;
             }
         }
-
-        return jsretArr;
+        
+        retValue.set(JS::ObjectValue(*jsretArr.get()));
     }
 
 };
@@ -248,7 +277,7 @@ void VPCallbackJS::notityJs(float dt) {
 
 #if defined(MOZJS_MAJOR_VERSION)
 #if MOZJS_MAJOR_VERSION >= 33
-bool js_PluginValuePotionJS_PluginValuePotion_setListener(JSContext *cx, uint32_t argc, jsval *vp)
+bool js_PluginValuePotionJS_PluginValuePotion_setListener(JSContext *cx, uint32_t argc, JS::Value *vp)
 #else
 bool js_PluginValuePotionJS_PluginValuePotion_setListener(JSContext *cx, uint32_t argc, jsval *vp)
 #endif
@@ -269,13 +298,13 @@ JSBool js_PluginValuePotionJS_PluginValuePotion_setListener(JSContext *cx, uint3
 
         JSB_PRECONDITION2(ok, cx, false, "js_PluginValuePotionJS_PluginValuePotion_setIAPListener : Error processing arguments");
         ValuePotionListenerJS* wrapper = new ValuePotionListenerJS();
-        wrapper->setJSDelegate(args.get(0));
+        wrapper->setJSDelegate(cx, args.get(0));
         sdkbox::PluginValuePotion::setListener(wrapper);
 
         args.rval().setUndefined();
         return true;
     }
-    JS_ReportError(cx, "js_PluginValuePotionJS_PluginValuePotion_setIAPListener : wrong number of arguments");
+    JS_ReportErrorUTF8(cx, "js_PluginValuePotionJS_PluginValuePotion_setIAPListener : wrong number of arguments");
     return false;
 }
 
